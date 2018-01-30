@@ -140,7 +140,10 @@ private class Observer<T: UITableViewCell>: NSObject, UITextFieldDelegate where 
                 textFieldRowFormer.former?.becomeEditingNext :
                 textFieldRowFormer.former?.endEditing
             _ = returnToNextRow?()
+        } else {
+            textField.resignFirstResponder()
         }
         return !textFieldRowFormer.returnToNextRow
     }
 }
+

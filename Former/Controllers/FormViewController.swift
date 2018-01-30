@@ -35,20 +35,31 @@ open class FormViewController: UIViewController {
     private final func setup() {
         view.backgroundColor = .groupTableViewBackground
         view.insertSubview(tableView, at: 0)
-        let tableConstraints = [
-          NSLayoutConstraint.constraints(
-            withVisualFormat: "V:|-0-[table]-0-|",
-                options: [],
-                metrics: nil,
-                views: ["table": tableView]
-            ),
-          NSLayoutConstraint.constraints(
-            withVisualFormat: "H:|-0-[table]-0-|",
-                options: [],
-                metrics: nil,
-                views: ["table": tableView]
-            )
-            ].flatMap { $0 }
-        view.addConstraints(tableConstraints)
+//MARK: Add SafeArea Constraint For IphoneX
+        if #available(iOS 11, *) {
+            let guide = view.safeAreaLayoutGuide
+            NSLayoutConstraint.activate([
+                tableView.topAnchor.constraintEqualToSystemSpacingBelow(guide.topAnchor, multiplier: 1.0),
+                guide.bottomAnchor.constraintEqualToSystemSpacingBelow(tableView.bottomAnchor, multiplier: 1.0),
+                tableView.leadingAnchor.constraint(equalTo: guide.leadingAnchor),
+                tableView.trailingAnchor.constraint(equalTo: guide.trailingAnchor)
+                ])
+        } else {
+            let tableConstraints = [
+                NSLayoutConstraint.constraints(
+                    withVisualFormat: "V:|-0-[table]-0-|",
+                    options: [],
+                    metrics: nil,
+                    views: ["table": tableView]
+                ),
+                NSLayoutConstraint.constraints(
+                    withVisualFormat: "H:|-0-[table]-0-|",
+                    options: [],
+                    metrics: nil,
+                    views: ["table": tableView]
+                )
+                ].flatMap { $0 }
+            view.addConstraints(tableConstraints)
+        }
     }
 }
