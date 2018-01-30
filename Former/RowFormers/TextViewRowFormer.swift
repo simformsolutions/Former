@@ -14,6 +14,11 @@ public protocol TextViewFormableRow: FormableRow {
     func formTextView() -> UITextView
 }
 
+public protocol RowFormerProtocol {
+    func cellUpdated() -> Void
+}
+
+
 open class TextViewRowFormer<T: UITableViewCell>
 : BaseRowFormer<T>, Formable where T: TextViewFormableRow {
     
@@ -22,13 +27,15 @@ open class TextViewRowFormer<T: UITableViewCell>
     override open var canBecomeEditing: Bool {
         return enabled
     }
-    
+
     open var text: String?
     open var placeholder: String?
     open var attributedPlaceholder: NSAttributedString?
     open var textDisabledColor: UIColor? = .lightGray
     open var titleDisabledColor: UIColor? = .lightGray
     open var titleEditingColor: UIColor?
+    open var characterLimit:Int = 0
+    open var upadteDelegate:RowFormerProtocol?
     
     public required init(instantiateType: Former.InstantiateType = .Class, cellSetup: ((T) -> Void)? = nil) {
         super.init(instantiateType: instantiateType, cellSetup: cellSetup)
@@ -186,5 +193,25 @@ NSObject, UITextViewDelegate where T: TextViewFormableRow {
             titleLabel?.textColor = textViewRowFormer.titleDisabledColor
         }
         textViewRowFormer.isEditing = false
+        
+// MARK:- Add the delegate method for resize the TextViewCell When Editing The View
+        guard let _ = textViewRowFormer.upadteDelegate else {
+            return
+        }
+        textViewRowFormer.upadteDelegate?.cellUpdated()
     }
+// MARK:- Calculate Text Count
+    fileprivate dynamic func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+        guard let textViewRowFormer = textViewRowFormer else { return false }
+        if(text == "\n") {
+            textView.resignFirstResponder()
+            return false
+        }
+        if textViewRowFormer.characterLimit > 0 {
+            return textView.text.count + (text.count - range.length) <= textViewRowFormer.characterLimit
+        } else {
+            return true
+        }
+    }
+
 }
